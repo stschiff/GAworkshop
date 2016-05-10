@@ -1,0 +1,4 @@
+.. _f3:
+
+Outgroup F3 Statistics
+======================
