@@ -65,9 +65,9 @@ Here is the code for making the typical ADMIXTURE-barplot for K=6:
 .. code-block:: R
 
     tbl=read.table("~/Data/MyProject/admixture/MyProject.HO.merged.6.Q")
-    indTable = read.table("~/Data/EgyptianMummies/admixture/EgyptianMummies.onlyTVFalse.HO.merged.ind",
+    indTable = read.table("~/Data/MyProject/admixture/MyProject.HO.merged.ind",
                    col.names = c("Sample", "Sex", "Pop"))
-    popGroups = read.table("~/Google Drive/GAworkshop/HO_popGroups.txt", col.names=c("Pop", "PopGroup"))
+    popGroups = read.table("~/Google Drive/GA_Workshop Jena/HO_popGroups.txt", col.names=c("Pop", "PopGroup"))
     
     mergedAdmixtureTable = cbind(tbl, indTable)
     mergedAdmWithPopGroups = merge(mergedAdmixtureTable, popGroups, by="Pop")
