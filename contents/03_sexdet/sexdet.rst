@@ -23,7 +23,7 @@ Generally, when I write ``$SNP_POS`` or ``$BAM_FILE``, you need to replace those
 
 The output of this command should look like this:
 
-.. code-block:: bash
+.. code-block::
 
     1	752567	0
     1	776546	1
@@ -38,7 +38,7 @@ The output of this command should look like this:
 
 (Use ``Ctrl-C`` to stop the command if it stalls.) The columns denote chromosome, position and the number of reads covering that site. We now need to write a little script that counts those read numbers for us, distinguishing autosomes, X chromosome and Y chromosome. I prepared such a script in ``/projects1/tools/workshop/2016/GenomeAnalysisWorkshop/sexDetermination.awk``. Copy that script into your project directory and open it with an editor. It is a script for the ``awk`` program, which is a very useful UNIX utility that is perfect for doing simple counting- or other statistics on file streams. You can learn awk yourself if you want, but for now the only important thing are the code lines which read
 
-.. code-block:: bash
+.. code-block:: awk
 
     if(chr == "X") {
         ...
@@ -52,7 +52,7 @@ The output of this command should look like this:
 
 As you can see, these lines check whether the chromosome is X or Y or neither of them (autosomes). Here you need to make sure that the names of the chromosomes are the same as in the reference that you used to align the sequences. You can quickly check that from the output of the ``samtools depth`` command above. If the first column looks like ``chr1`` or ``chr2`` instead of ``1`` or ``2``, than you need to change the awk script lines above to:
 
-.. code-block:: bash
+.. code-block:: awk
 
     if(chr == "chrX") {
         ...
@@ -72,7 +72,8 @@ Makes sense, right? OK, so now that you have your little awk script with the cor
 
 Here, I am only piping the first 1000 lines into the awk script to see whether it works. The output should look like:
 
-.. code-block:: bash
+.. code-block::
+
     xCoverage	0
     yCoverage	0
     autCoverage	2.19565
@@ -109,7 +110,7 @@ Indeed, the output look like this:
 
 which looks correct. So I now put a comment (``#``) in from of the ``echo``, and remove the comment from the ``sbatch``, and run the script again. Sure enough, the terminal tells me that 40 jobs have been submitted, and with ``squeue``, I can convince myself that they are actually running. After a few minutes, jobs should be finished, and you can look into your output directory to see all the result files. You should check that the result files are not empty, for example by listing the results folder via `ls -lh` and look at column 4, which displays the size of the files in byte. It should be larger than zero for all output files (and zero for the log files, because there was no log output):
 
-.. code-block:: bash
+.. code-block::
 
     adminschif@cdag1 /data/schiffels/GAworkshop $ ls -lh
     total 160K
@@ -150,7 +151,7 @@ We now want to prepare a table to load into Excel with four columns: Sample, xCo
 
 Make your script executable using ``chmod`` as shown above, and run it. The result looks in my case like this:
 
-.. code-block:: bash
+.. code-block::
 
     schiffels@damp132140 ~/dev/GAworkshopScripts $ ./printSexDeterminationTable.sh
     Sample	xCov	yCov	autCov
@@ -166,22 +167,26 @@ and Y-chromosome,  compared to  autosomes. You could  now for  example plot thos
 An example,  taken from a recent  paper (Fu et  al. 2016 "The  genetic history of Ice  Age Europe"),
 looks like this:
 
-##TODO still TODO after this
-![Example plot for sex determination](sexDetExample.png)
+.. image:: sexDetExample.png
 
 As you can see, in this case the relative Y chromosome coverage provides a much better separation of samples into (presumably) male and female, so here the authors used a relative y coverage of >0.2 to determine males, and <0.05 to determine females. Often, unfortunately, clustering is much less pronounced, and you will have to manually decide how to flag samples as "male", "female" or "unknown".
 
-## Nuclear contamination estimates in Males
+Nuclear contamination estimates in Males
+----------------------------------------
 
-Now that we have classified at least some samples as "probably male", we can use their haploid X chromosome to estimate nuclear contamination. For this, we use the ANGSD-software. According to the [ANGSD-Documentation](http://popgen.dk/angsd/index.php/Contamination), estimating X chromosome contamination from BAM files involves two steps.
+Now that we have classified at least some samples as "probably male", we can use their haploid X chromosome to estimate nuclear contamination. For this, we use the ANGSD-software. According to the `ANGSD-Documentation <http://popgen.dk/angsd/index.php/Contamination>`_, estimating X chromosome contamination from BAM files involves two steps.
 
 The first step counts how often each of the four alleles is seen in variable sites in the X chromosome of a sample:
 
+.. code-block:: bash
+
     angsd -i $BAM -r X:5000000-154900000 -doCounts 1 -iCounts 1 -minMapQ 30 -minQ 30 -out $OUT
 
-Here, I assume that the X chromosome is called `X`. If in your bam file it's called `chrX`, you need to replace the region specification in the `-r` flag above. Note that the range 5Mb-154Mb is used in the example in the website, so I just copied it here. The `$OUT` file above actually denotes a filename-prefix, since there will be several output files from this command, which attach different file-endings after the given prefix.
+Here, I assume that the X chromosome is called ``X``. If in your bam file it's called ``chrX``, you need to replace the region specification in the ``-r`` flag above. Note that the range 5Mb-154Mb is used in the example in the website, so I just copied it here. The `$OUT` file above actually denotes a filename-prefix, since there will be several output files from this command, which attach different file-endings after the given prefix.
 
-To loop this command again over all samples, write a shell script as shown above, check the correct commands via an `echo` command and if they are correct, submit them using `sbatch`. My script looks like this:
+To loop this command again over all samples, write a shell script as shown above, check the correct commands via an ``echo`` command and if they are correct, submit them using ``sbatch``. My script looks like this:
+
+.. code-block:: bash
 
     #!/usr/bin/env bash
 
@@ -201,12 +206,16 @@ This should run very fast. Check whether the output folder is populated with non
 
 The second step in ANGSD is the actual contamination estimation. Here is the command line recommended in the documentation:
 
+.. code-block:: bash
+
     /projects1/tools/angsd_0.910/misc/contamination -a $PREFIX.icnts.gz \
     -h /projects1/tools/angsd_0.910/RES/HapMapChrX.gz 2> $OUT
 
-Here, the executable is given with the full path because it is somewhat hidden. The `$PREFIX` variable should be replaced by the output-file prefix given in the previous (allele counting) command for the same sample. The HapMap file is provided by ANGSD and contains global allele frequency estimates used for the contamination calculation. Note that here we are not piping the standard out into the output file `$OUT`, but the standard error, indicated in bash via the special pipe `2>`. The reason is that this ANGSD-program writes its results into the standard error rather than the standard output.
+Here, the executable is given with the full path because it is somewhat hidden. The ``$PREFIX`` variable should be replaced by the output-file prefix given in the previous (allele counting) command for the same sample. The HapMap file is provided by ANGSD and contains global allele frequency estimates used for the contamination calculation. Note that here we are not piping the standard out into the output file ``$OUT``, but the standard error, indicated in bash via the special pipe ``2>``. The reason is that this ANGSD-program writes its results into the standard error rather than the standard output.
 
 Again, you have to loop this through all samples like this:
+
+.. code-block:: bash
 
     #!/usr/bin/env bash
 
@@ -226,9 +235,13 @@ Again, you have to loop this through all samples like this:
 
 If this worked correctly, you should now have a contamination estimate for each sample. For a single sample, the output looks a bit messy, but the last line should read:
 
+.. code-block::
+
     Method2: new_llh Version: MoM:0.072969 SE(MoM):5.964563e-02 ML:0.079651 SE(ML):7.892058e-16
 
 This is the line indicating the contamination estimate using the "Methods of Moments" (MoM), and its standard error SE(MoM). You can grep all those lines:
+
+.. code-block::
 
     adminschif@cdag1 /data/schiffels/GAworkshop/xContamination $ grep 'Method2: new_llh' *.out
     JK2131udg.xContamination.out:Method2: new_llh Version: MoM:0.285843 SE(MoM):3.993658e-02 ML:0.281400 SE(ML):4.625781e-14
@@ -239,10 +252,14 @@ This is the line indicating the contamination estimate using the "Methods of Mom
 
 You now want to include those results into your Excel table with the sex determination estimates. Copy them over to your laptop like shown above, in my case:
 
+.. code-block:: bash
+
     mkdir -p ~/Data/GAworkshop/contamination
     scp adminschif@cdag1.cdag.shh.mpg.de:/data/schiffels/GAworkshop/xContamination/*.xContamination.out ~/Data/GAworkshop/contamination/
 
 and you can now generate a simpler output using a little bash script like this:
+
+.. code-block:: bash
 
     #!/usr/bin/env bash
 
@@ -254,6 +271,6 @@ and you can now generate a simpler output using a little bash script like this:
         printf "$SAMPLE\t$CONTAM\t$SE\n"
     done
 
-If you run this, you may find that in some cases the output is empty, because angsd failed. You should then go back and check - for those samples - the *.log output from the contamination run above to see what was the reason for failure. In some cases, SLURM killed the job because it exceeded memory. You should then increase the memory set in the `--mem` flag in `sbatch`. In other cases, angsd failed for unknown reasons... nothing we can do about currently.
+If you run this, you may find that in some cases the output is empty, because angsd failed. You should then go back and check - for those samples - the `*.log` output from the contamination run above to see what was the reason for failure. In some cases, SLURM killed the job because it exceeded memory. You should then increase the memory set in the ``--mem`` flag in `sbatch`. In other cases, angsd failed for unknown reasons... nothing we can do about currently.
 
 Finally, you can use this table, feed it into Excel and find male samples with low contamination to proceed with in the analysis.
