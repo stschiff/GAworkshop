@@ -1,7 +1,7 @@
 Welcome to the Genome Analysis Workshop
 =======================================
 
-This is the central documentation / handout for a workshop held May 9 - May 11 2016 by `Dr. Stephan Schiffels <http://www.shh.mpg.de/mitarbeiter/44297/25500>`_, `Alexander Peltzer <http://www.shh.mpg.de/mitarbeiter/40900/25500>`_ and `Stephen Clayton <http://www.shh.mpg.de/mitarbeiter/47439/25500>`_ at the `Max-Planck-Institute for the Science of Human History, Jena/Germany <http://http://www.shh.mpg.de/>`_.
+This is the central documentation / handout for a workshop held May 9 - May 11 2016 by `Dr. Stephan Schiffels <http://www.shh.mpg.de/mitarbeiter/44297/25500>`_, `Alexander Peltzer <http://www.shh.mpg.de/mitarbeiter/40900/25500>`_ and `Stephen Clayton <http://www.shh.mpg.de/mitarbeiter/47439/25500>`_ at the `Max-Planck-Institute for the Science of Human History, Jena/Germany <http://www.shh.mpg.de/>`_.
 
 
 Contents:
