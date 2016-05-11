@@ -38,6 +38,34 @@ The README and name of the tools is actually geared towards the first use case o
 
 Note that in this case the first population is a single sample, the second loops through all HO populations, and the third one is a fixed outroup, here Yoruba. For Non-African population studies you can use "Mbuti" as outgroup, which is commonly used as an unbiased outgroup to all Non-Africans.
 
+Analysing groups of samples (populations)
+-----------------------------------------
+
+If you only analyse a single population, or a few, you can manually create lists of population triples. In that case, first locate the list of all Human Origins populations here: ``/projects1/users/schiffels/PublicData/HumanOriginsData.backup/HO_populations.txt``, and construct a file with the desired population triples using an awk-one-liner:
+
+.. code-block:: bash
+
+    awk '{print "YourPopulation", $1, "Mbuti"}' $HO_populations > $OUT
+
+Here, "YourPopulation" should be replaced by the population in you ``*.ind.txt`` file that you want to focus on, and "Mbuti" is the outgroup (pick another one if appropriate). Then, construct a parameter file like this:
+
+.. code-block::
+
+    genotypename:   /data/schiffels/GAworkshop/genotyping/MyProject.HO.eigenstrat.merged.geno.txt
+    snpname:   /data/schiffels/GAworkshop/genotyping/MyProject.HO.eigenstrat.merged.snp.txt
+    indivname:   /data/schiffels/GAworkshop/genotyping/MyProject.HO.eigenstrat.ind.txt
+    popfilename:  <YOUR_POPULATION_TRIPLE_LIST>
+    
+and run it via
+
+.. code-block:: bash
+
+    qp3Pop -p $PARAMETER_FILE > $OUT
+
+
+Analysing individual samples
+----------------------------
+
 In my case, I selected 6 samples that showed low levels of contamination and chose to run them independently through F3 statistics. You may also choose to group test samples together into one population. In my case, I create 6 separate population lists like this:
 
 .. code-block:: bash
