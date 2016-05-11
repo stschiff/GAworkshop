@@ -21,9 +21,7 @@ The first step is to run ``samtools depth`` on the bam files. To get an idea on 
 
 Generally, when I write ``$SNP_POS`` or ``$BAM_FILE``, you need to replace those variables with actual file names. Here, ``-b $SNP_POS`` inputs a text file that contains the positions in the capture experiment. We have prepared various SNP positions files for you, for both 390K and 1240K capture panels. You can find them in ``/projects1/Reference_Genomes/Human/hs37d5/SNPCapBEDs`` and ``/projects1/Reference_Genomes/Human/HG19/SNPCapBEDs``, depending on which reference genome you have used to map the genome you are working with, and which SNP panel was used (e.g. 1240k). The flags ``-q30 -Q37`` are filters on base- and mapping quality, and the ``-a`` flag forces output of every site, even those with coverage 0 (which is important for counting sites). Finally, ``$BAM_FILE`` denotes the - wait for it - bam file.
 
-The output of this command should look like this:
-
-.. code-block::
+The output of this command should look like this: ::
 
     1	752567	0
     1	776546	1
@@ -70,9 +68,7 @@ Makes sense, right? OK, so now that you have your little awk script with the cor
 
     samtools depth -q30 -Q37 -a -b $SNP_POS $BAM_FILE | head -1000 | awk -f sexDetermination.awk
 
-Here, I am only piping the first 1000 lines into the awk script to see whether it works. The output should look like:
-
-.. code-block::
+Here, I am only piping the first 1000 lines into the awk script to see whether it works. The output should look like: ::
 
     xCoverage	0
     yCoverage	0
@@ -108,9 +104,7 @@ Indeed, the output look like this:
     samtools depth -q30 -Q37 -a -b /projects1/Reference_Genomes/Human/hs37d5/SNPCapBEDs/1240KPosGrch37.bed /data/schiffels/MyProject/mergedBams.backup/JK2132udg/JK2132udg.mapped.sorted.rmdup.bam | awk -f /home/adminschif/dev/GAworkshop/sexDetermination.awk > /data/schiffels/GAworkshop/JK2132udg.sexDetermination.txt
     ...
 
-which looks correct. So I now put a comment (``#``) in from of the ``echo``, and remove the comment from the ``sbatch``, and run the script again. Sure enough, the terminal tells me that 40 jobs have been submitted, and with ``squeue``, I can convince myself that they are actually running. After a few minutes, jobs should be finished, and you can look into your output directory to see all the result files. You should check that the result files are not empty, for example by listing the results folder via `ls -lh` and look at column 4, which displays the size of the files in byte. It should be larger than zero for all output files (and zero for the log files, because there was no log output):
-
-.. code-block::
+which looks correct. So I now put a comment (``#``) in from of the ``echo``, and remove the comment from the ``sbatch``, and run the script again. Sure enough, the terminal tells me that 40 jobs have been submitted, and with ``squeue``, I can convince myself that they are actually running. After a few minutes, jobs should be finished, and you can look into your output directory to see all the result files. You should check that the result files are not empty, for example by listing the results folder via `ls -lh` and look at column 4, which displays the size of the files in byte. It should be larger than zero for all output files (and zero for the log files, because there was no log output): ::
 
     adminschif@cdag1 /data/schiffels/GAworkshop $ ls -lh
     total 160K
@@ -149,9 +143,7 @@ We now want to prepare a table to load into Excel with four columns: Sample, xCo
         printf "$SAMPLE\t$XCOV\t$YCOV\t$AUTCOV\n"
     done
 
-Make your script executable using ``chmod`` as shown above, and run it. The result looks in my case like this:
-
-.. code-block::
+Make your script executable using ``chmod`` as shown above, and run it. The result looks in my case like this: ::
 
     schiffels@damp132140 ~/dev/GAworkshopScripts $ ./printSexDeterminationTable.sh
     Sample	xCov	yCov	autCov
@@ -233,15 +225,11 @@ Again, you have to loop this through all samples like this:
     done
 
 
-If this worked correctly, you should now have a contamination estimate for each sample. For a single sample, the output looks a bit messy, but the last line should read:
-
-.. code-block::
+If this worked correctly, you should now have a contamination estimate for each sample. For a single sample, the output looks a bit messy, but the last line should read: ::
 
     Method2: new_llh Version: MoM:0.072969 SE(MoM):5.964563e-02 ML:0.079651 SE(ML):7.892058e-16
 
-This is the line indicating the contamination estimate using the "Methods of Moments" (MoM), and its standard error SE(MoM). You can grep all those lines:
-
-.. code-block::
+This is the line indicating the contamination estimate using the "Methods of Moments" (MoM), and its standard error SE(MoM). You can grep all those lines: ::
 
     adminschif@cdag1 /data/schiffels/GAworkshop/xContamination $ grep 'Method2: new_llh' *.out
     JK2131udg.xContamination.out:Method2: new_llh Version: MoM:0.285843 SE(MoM):3.993658e-02 ML:0.281400 SE(ML):4.625781e-14

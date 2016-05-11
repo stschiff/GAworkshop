@@ -47,9 +47,7 @@ If you only analyse a single population, or a few, you can manually create lists
 
     awk '{print "YourPopulation", $1, "Mbuti"}' $HO_populations > $OUT
 
-Here, "YourPopulation" should be replaced by the population in you ``*.ind.txt`` file that you want to focus on, and "Mbuti" is the outgroup (pick another one if appropriate). Then, construct a parameter file like this:
-
-.. code-block::
+Here, "YourPopulation" should be replaced by the population in you ``*.ind.txt`` file that you want to focus on, and "Mbuti" is the outgroup (pick another one if appropriate). Then, construct a parameter file like this: ::
 
     genotypename:   /data/schiffels/GAworkshop/genotyping/MyProject.HO.eigenstrat.merged.geno.txt
     snpname:   /data/schiffels/GAworkshop/genotyping/MyProject.HO.eigenstrat.merged.snp.txt
