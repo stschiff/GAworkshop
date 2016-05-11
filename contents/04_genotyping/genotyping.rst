@@ -114,11 +114,15 @@ OK, so now that you know that it works in principle, you need to again write a l
 
 Note that I am now looping over 22 chromosomes instead of samples (as we have done in other scripts). The line beginning with ``BAM_FILES=...`` looks a bit cryptic. The syntax ``$(...)`` will put the output of the command in brackets into the ``BAM_FILES`` variable. The ``tr '\n' ' '`` bit takes the listing output from ``ls`` and convert new lines into spaces, such that all bam files are simply put behind each other in the ``simpleBamCaller`` command line. Before you submit, look at the output of this script by piping it into ``less -S``, which will not wrap the very long command lines and allows you to inspect whether all files are given correctly. When you are sure it's correct, remove the comment from the ``sbatch`` line and comment out the ``echo`` line to submit.
 
-### A word about DNA damage
-If the samples you are analysing are ancient samples, the DNA will likely contain DNA damage, so C->T changes which are seen as C->T and G->A substitutions in the BAM files. There are two ways how to deal with that. First, if your data is not UDG-treated, so if it contains the full damage, you should restrict your analysis to Transversion SNPs only. To that end, simply add the `-t` flag to `simpleBamCaller`, which will automatically output only transversion SNPs. If your data is UDG-treated, you will have much less damage, but you can still see damaged sites in particular in the boundary of the reads in your BAM-file. In that case, you probably want to make a modified bam file for each sample, where the first 2 bases on each end of the read are clipped. A useful tool to do that is [TrimBam](http://genome.sph.umich.edu/wiki/BamUtil:_trimBam), which we will not discuss here, but which I recommend to have a look at if you would like to analyse Transition SNPs from UDG treated libraries.
+A word about DNA damage
+-----------------------
 
-## Merging across chromosomes
-Since the EigenStrat format consists of simple text files, where rows denote SNPs, we can simply merge across all chromosomes using the UNIX `cat` program. If you `cd` to the directory containing the eigenstrat output files for all chromosomes and run `ls` you should see something like:
+If the samples you are analysing are ancient samples, the DNA will likely contain DNA damage, so C->T changes which are seen as C->T and G->A substitutions in the BAM files. There are two ways how to deal with that. First, if your data is not UDG-treated, so if it contains the full damage, you should restrict your analysis to Transversion SNPs only. To that end, simply add the ``-t`` flag to ``simpleBamCaller``, which will automatically output only transversion SNPs. If your data is UDG-treated, you will have much less damage, but you can still see damaged sites in particular in the boundary of the reads in your BAM-file. In that case, you probably want to make a modified bam file for each sample, where the first 2 bases on each end of the read are clipped. A useful tool to do that is `TrimBam <http://genome.sph.umich.edu/wiki/BamUtil:_trimBam>`_, which we will not discuss here, but which I recommend to have a look at if you would like to analyse Transition SNPs from UDG treated libraries.
+
+Merging across chromosomes
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Since the EigenStrat format consists of simple text files, where rows denote SNPs, we can simply merge across all chromosomes using the UNIX ``cat`` program. If you ``cd`` to the directory containing the eigenstrat output files for all chromosomes and run ``ls`` you should see something like::
 
     MyProject.HO.eigenstrat.chr10.geno.txt
     MyProject.HO.eigenstrat.chr10.ind.txt
@@ -128,27 +132,34 @@ Since the EigenStrat format consists of simple text files, where rows denote SNP
     MyProject.HO.eigenstrat.chr11.snp.txt
     ...
 
-A naive way to merge across chromosomes might then simply be
+A naive way to merge across chromosomes might then simply be:
+
+.. code-block:: bash
 
     cat MyProject.HO.eigenstrat.chr*.geno.txt > MyProject.HO.eigenstrat.allChr.geno.txt
     cat MyProject.HO.eigenstrat.chr*.snp.txt > MyProject.HO.eigenstrat.allChr.snp.txt
 
-(Note that the `*.ind.txt` file will be treated separately below). However, these `cat` command lines won't do the job correctly, because they won't merge the chromosomes in the right order. To ensure the correct order, I recommend printing all files in a loop in a sub-shell like this:
+(Note that the ``*.ind.txt`` file will be treated separately below). However, these ``cat`` command lines won't do the job correctly, because they won't merge the chromosomes in the right order. To ensure the correct order, I recommend printing all files in a loop in a sub-shell like this:
+
+.. code-block:: bash
 
     (for CHR in {1..22}; do cat MyProject.HO.eigenstrat.chr$CHR.geno.txt; done) > MyProject.HO.eigenstrat.allChr.geno.txt
     (for CHR in {1..22}; do cat MyProject.HO.eigenstrat.chr$CHR.snp.txt; done) > MyProject.HO.eigenstrat.allChr.snp.txt
 
-Here, each `cat` command only outputs one file at a time, but the entire loop runs in a sub-shell denoted by brackets, whose output will be piped into a file.
+Here, each ``cat`` command only outputs one file at a time, but the entire loop runs in a sub-shell denoted by brackets, whose output will be piped into a file.
 
-Now, let's deal with the `*.ind.txt` file. As you can see, `simpleBamCaller` created one `*.ind.txt` per chromosome, but we only need one file in the end, so I suggest you simply copy the one from chromosome 1. But at the same time, we want to fix the third column of the `*.ind.txt` file to something more tellinf than "Unknown". So copy the file from chromosome 1, and open it in an editor, and replace all "Unknown" to the population name of that sample. The sex (2nd column) is not necessary.
+Now, let's deal with the ``*.ind.txt`` file. As you can see, ``simpleBamCaller`` created one ``*.ind.txt`` per chromosome, but we only need one file in the end, so I suggest you simply copy the one from chromosome 1. But at the same time, we want to fix the third column of the ``*.ind.txt`` file to something more tellinf than "Unknown". So copy the file from chromosome 1, and open it in an editor, and replace all "Unknown" to the population name of that sample. The sex (2nd column) is not necessary.
 
-You should now have three final eigenstrat files for your test samples: A `*.geno.txt` file, a `*.snp.txt` file and a `*.ind.txt` file.
+.. note::
 
-## Merging the test genotypes with the Human Origins data set
+  You should now have three final eigenstrat files for your test samples: A ``*.geno.txt`` file, a ``*.snp.txt`` file and a ``*.ind.txt`` file.
 
-As last step in this session, we need to merge the data set containing your test samples with the HO reference panel. To do this, we will use the `mergeit`-program from the [Eigensoft package](https://data.broadinstitute.org/alkesgroup/EIGENSOFT/), which is already installed on the cluster.
+Merging the test genotypes with the Human Origins data set
+----------------------------------------------------------
 
-This program needs a parameter file that - in my case - looks like this:
+As last step in this session, we need to merge the data set containing your test samples with the HO reference panel. To do this, we will use the ``mergeit``-program from the `Eigensoft package <https://data.broadinstitute.org/alkesgroup/EIGENSOFT/>`_, which is already installed on the cluster.
+
+This program needs a parameter file that - in my case - looks like this::
 
     geno1:	/projects1/users/schiffels/PublicData/HumanOriginsData.backup/EuropeData.eigenstratgeno.txt
     snp1:	/projects1/users/schiffels/PublicData/HumanOriginsData.backup/EuropeData.simple.snp.txt
@@ -161,16 +172,16 @@ This program needs a parameter file that - in my case - looks like this:
     indoutfilename:	/data/schiffels/GAworkshop/genotyping/MyProject.HO.eigenstrat.merged.ind.txt
     outputformat: EIGENSTRAT
 
-If you have such a parameter file, you can run `mergeit` simply like this:
+If you have such a parameter file, you can run ``mergeit`` simply like this::
 
     mergeit -p $PARAM_FILE
 
-and to submit to SLURM:
+and to submit to SLURM::
 
     sbatch -o $LOG --mem=2000 --wrap="mergeit -p $PARAM_FILE"
 
-where `$PARAM_FILE` should be replaced by your parameter file, of course.
+where ``$PARAM_FILE`` should be replaced by your parameter file, of course.
 
 To test whether it worked correctly, you should check the resulting "indoutfilename" as specified in the parameter file, to see whether it contains both the individuals of the reference panel and the those of your test data set.
 
-Note that the output of the `mergeit` program is by default a binary format called "PACEDANCESTRYMAP", which is fine for smartpca but not for other analyses we'll be doing later, so I explicitly put the outputformat in the parameter file to force the output to be eigenstrat.
+Note that the output of the ``mergeit`` program is by default a binary format called "PACEDANCESTRYMAP", which is fine for smartpca but not for other analyses we'll be doing later, so I explicitly put the outputformat in the parameter file to force the output to be eigenstrat.
