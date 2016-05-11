@@ -1,5 +1,8 @@
-Welcome to GAWorkshop's documentation!
-======================================
+Welcome to the Genome Analysis Workshop
+=======================================
+
+This is the central documentation / handout for a workshop held May 9 - May 11 2016 by Dr. Stephan Schiffels, Alexander Peltzer and Stephen Clayton at the Max-Planck-Institute for the Science of Human History, Jena/Germany.
+
 
 Contents:
 
