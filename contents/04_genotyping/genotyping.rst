@@ -183,4 +183,4 @@ where ``$PARAM_FILE`` should be replaced by your parameter file, of course.
 
 To test whether it worked correctly, you should check the resulting "indoutfilename" as specified in the parameter file, to see whether it contains both the individuals of the reference panel and the those of your test data set.
 
-Note that the output of the ``mergeit`` program is by default a binary format called "PACEDANCESTRYMAP", which is fine for smartpca but not for other analyses we'll be doing later, so I explicitly put the outputformat in the parameter file to force the output to be eigenstrat.
+Note that the output of the ``mergeit`` program is by default a binary format called "PACKEDANCESTRYMAP", which is fine for smartpca but not for other analyses we'll be doing later, so I explicitly put the outputformat in the parameter file to force the output to be eigenstrat.
