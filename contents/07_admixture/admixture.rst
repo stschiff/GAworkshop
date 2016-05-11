@@ -78,3 +78,32 @@ which gives:
    :width: 600px
    :height: 500px
    :align: center
+
+OK, so this is already something, at least the continental groups are ordered, but we would like to also display the population group names below the axis. For this, we'll write a function in R:
+
+.. code-block:: R
+
+    barNaming <- function(vec) {
+        retVec <- vec
+        for(k in 2:length(vec)) {
+            if(vec[k-1] == vec[k])
+                retVec[k] <- ""
+        }
+        return(retVec)
+    }
+
+and we can then replot:
+
+.. code-block:: R
+    
+    par(mar=c(10,4,4,4))
+    barplot(t(as.matrix(ordered[,2:7])), col=rainbow(6), border=NA, 
+            names.arg=barNaming(ordered$PopGroup), las=2)
+
+which should give:
+
+.. image:: admixturePlotWithLabels.png
+   :width: 600px
+   :height: 500px
+   :align: center
+
