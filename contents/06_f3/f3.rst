@@ -13,7 +13,7 @@ F3 statistics are in both cases defined as the product of allele frequency diffe
 
     F3=<(c-a)(c-b)>
 
-Here, ``<>`` denotes the average over all genotyped sites, and ``a``, ``b`` and ``c`` denote the allele frequency in the three populations. Outgroup F3 statistics measure the amount of _shared genetic drift_ between two populations from a common ancestor. In a phylogenetic tree connecting A, B and C, Outgroup F3 statistics measure the common branch length from the outgroup, here indicated in red:
+Here, ``<>`` denotes the average over all genotyped sites, and ``a``, ``b`` and ``c`` denote the allele frequency in the three populations. Outgroup F3 statistics measure the amount of _shared genetic drift between two populations from a common ancestor. In a phylogenetic tree connecting A, B and C, Outgroup F3 statistics measure the common branch length from the outgroup, here indicated in red:
 
 .. image:: f3-tree.png
    :width: 300px
