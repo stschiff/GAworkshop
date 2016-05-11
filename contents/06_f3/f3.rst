@@ -62,7 +62,6 @@ and run it via
 
     qp3Pop -p $PARAMETER_FILE > $OUT
 
-
 Analysing individual samples
 ----------------------------
 
@@ -112,7 +111,7 @@ The first three lines of the parameter file specify the EIGENSTRAT data set, sim
 
         LOG=$OUTDIR/$SAMPLE.qp3Pop.log
         OUT=$OUTDIR/$SAMPLE.qp3Pop.out
-        sbatch -o $LOG --wrap="qp3Pop -p $PARAMSFILE > $OUT"
+        sbatch --mem 4000 -o $LOG --wrap="qp3Pop -p $PARAMSFILE > $OUT"
     done
 
 This should run for 10-20 minutes. When finished, transfer the resulting files to your laptop using ``scp``.
