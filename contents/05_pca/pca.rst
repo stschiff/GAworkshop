@@ -140,7 +140,9 @@ OK, so now, as a first step, we can improve our simple first plot by using the c
     :height: 500px
     :align: center
 
-The final solution for me was to also separate populations by symbol, which involves a bit more hacking. First, to use different symbols for different populations, you can give a simple vector of symbols to the ``plot`` command via ``pch=as.integer(mergedEvecDat$Pop) %% 24``. The trick here is that first you convert ``mergedEvecDat$Pop`` to an integer enumerating all populations, and then you use the ``modulo`` operation to cycle through 24 different numbers. The complete solution in my case looks like this::
+The final solution for me was to also separate populations by symbol, which involves a bit more hacking. First, to use different symbols for different populations, you can give a simple vector of symbols to the ``plot`` command via ``pch=as.integer(mergedEvecDat$Pop) %% 24``. The trick here is that first you convert ``mergedEvecDat$Pop`` to an integer enumerating all populations, and then you use the ``modulo`` operation to cycle through 24 different numbers. The complete solution in my case looks like this:
+
+.. code-block:: R
 
     fn = "~/Data/GAworkshop/pca/MyProject.HO.merged.pca.evec.txt"
     evecDat = read.table(fn, col.names=c("Sample", "PC1", "PC2", "PC3", "PC4", "PC5",
