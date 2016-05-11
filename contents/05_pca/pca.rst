@@ -146,19 +146,21 @@ The final solution for me was to also separate populations by symbol, which invo
 
 .. code-block:: R
 
-    fn = "~/Data/GAworkshop/pca/MyProject.HO.merged.pca.evec.txt"
-    evecDat = read.table(fn, col.names=c("Sample", "PC1", "PC2", "PC3", "PC4", "PC5",
+    fn <- "~/Data/GAworkshop/pca/MyProject.HO.merged.pca.evec.txt"
+    evecDat <- read.table(fn, col.names=c("Sample", "PC1", "PC2", "PC3", "PC4", "PC5",
                                          "PC6", "PC7", "PC8", "PC9", "PC10", "Pop"))
-    popGroups=read.table("~/Google_Drive/Projects/GAworkshopScripts/HO_popGroups.txt", col.names=c("Pop", "PopGroup"))
-    mergedEvecDat = merge(evecDat, popGroups, by="Pop")
-
+    popGroups <- read.table("~/Google_Drive/GA_workshop Jena/HO_popGroups.txt", col.names=c("Pop", "PopGroup"))
+    popGroupsWithSymbol <- cbind(popGroups, (1:nrow(popGroups)) %% 26)
+    colnames(popGroupsWithSymbol)[3] = "symbol"
+    mergedEvecDat = merge(evecDat, popGroupsWithSymbol, by="Pop")
+    
     layout(matrix(c(1,2), ncol=1), heights=c(1.5, 1))
     par(mar=c(4,4,0,0))
-    plot(mergedEvecDat$PC1, mergedEvecDat$PC2, col=mergedEvecDat$PopGroup, pch=as.integer(mergedEvecDat$Pop) %% 24, cex=0.6, cex.axis=0.6, cex.lab=0.6, xlab="PC1", ylab="PC2")
+    plot(mergedEvecDat$PC1, mergedEvecDat$PC2, col=mergedEvecDat$PopGroup, pch=mergedEvecDat$symbol, cex=0.6, cex.axis=0.6, cex.lab=0.6, xlab="PC1", ylab="PC2")
     plot.new()
     par(mar=rep(0, 4))
-    legend("center", legend=popGroups$Pop, col=popGroups$PopGroup, pch=as.integer(popGroups$Pop) %% 24, ncol=6, cex=0.6)
-
+    legend("center", legend=popGroupsWithSymbol$Pop, col=popGroupsWithSymbol$PopGroup, pch=popGroupsWithSymbol$symbol, ncol=6, cex=0.6)
+    
 which produces:
 
 .. image:: fullPCA.png
