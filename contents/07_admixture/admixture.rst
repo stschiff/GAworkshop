@@ -75,6 +75,6 @@ Here is the code for making the typical ADMIXTURE-barplot for K=6:
 which gives:
 
 .. image:: admixturePlot.png
-   :width: 300px
-   :height: 300px
+   :width: 600px
+   :height: 500px
    :align: center
