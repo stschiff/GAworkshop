@@ -178,8 +178,8 @@ OK, let's now make a plot::
 which should yield:
 
 .. image:: f3singleSample.png
-   :width: 300px
-   :height: 300px
+   :width: 400px
+   :height: 400px
    :align: center
 
 

@@ -58,8 +58,8 @@ where ``fn`` obviously should point to the ``*.evec.txt`` file produced from ``s
 You see that it's pretty much a table. You can now very easily produce a plot of PC1 vs. PC2, by typing ``plot(evecDat$PC1, evecDat$PC2, xlab="PC1", ylab="PC2")``, which in my case yields a boring figure like this:
 
 .. image:: pca_simple.png
-   :width: 300px
-   :height: 300px
+   :width: 500px
+   :height: 500px
    :align: center
 
 Now, obviously, we would like to highlight the different populations by color. A quick and dirty solution is to simply plot different subsets of the data on top of each other, like this::
@@ -75,8 +75,8 @@ Now, obviously, we would like to highlight the different populations by color. A
 You can copy and paste all those lines simultaneously into the console, by the way. This sequence of commands gives us:
 
 .. image:: pcaWithSomeColor.png
-   :width: 300px
-   :height: 300px
+   :width: 500px
+   :height: 500px
    :align: center
 
 OK, but how do we systematically show all the interesting populations? In principle, R makes this easily possible: Instead of choosing a single color and symbols (the ``col`` and ``pch`` options), you can give R vectors to these options, which contain one value for each sample. To make this clearer, run ``plot(evecDat$PC1, evecDat$PC2, col=evecDat$Pop)``, which should produce a _very_ colorful, but also useless, plot, where each population has its own color (although R cycles only 8 colors, so you will have every color used for many populations). OK, this is not useful. We should have a broader categorization into continental groups.
@@ -136,8 +136,8 @@ OK, so now, as a first step, we can improve our simple first plot by using the c
     legend("bottomright", legend=levels(mergedEvecDat$PopGroup), col=1:length(levels(mergedEvecDat$PopGroup)), pch=20)
 
 .. image:: pcaWithPopGroupColor.png
-    :width: 300px
-    :height: 300px
+    :width: 500px
+    :height: 500px
     :align: center
 
 The final solution for me was to also separate populations by symbol, which involves a bit more hacking. First, to use different symbols for different populations, you can give a simple vector of symbols to the ``plot`` command via ``pch=as.integer(mergedEvecDat$Pop) %% 24``. The trick here is that first you convert ``mergedEvecDat$Pop`` to an integer enumerating all populations, and then you use the ``modulo`` operation to cycle through 24 different numbers. The complete solution in my case looks like this::
@@ -158,8 +158,8 @@ The final solution for me was to also separate populations by symbol, which invo
 which produces:
 
 .. image:: fullPCA.png
-    :width: 300px
-    :height: 300px
+    :width: 500px
+    :height: 500px
     :align: center
 
 
