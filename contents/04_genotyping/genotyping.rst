@@ -18,46 +18,49 @@ A typical command line for chromosome 20 may look like:
 
 Let's go through the options one by one:
 
-# GOT UNTIL HERE
+1. ``-f $SNP_FILE``: This option gives the file with the list of SNPs and alleles. The program expects a three-column format consisting of chromosome, position and the two alleles separated by a comma. For the Human Origins SNP panel we have prepared such a file. You can find it at ``/projects1/users/schiffels/PublicData/HumanOriginsData.backup/EuropeData.positions.txt``. In case you have aligned your samples to HG19, which uses chromosome names start with ``chr``, you need to use the file ``EuropeData.positions.altChromName.txt`` in the same directory.
+2. ``-c 20`` The chromosome name. In simpleBamCaller you need to call each chromosome separately. It's anyway recommended to parallelise across chromosomes to speed up calling. Note that if your BAM files are aligned to HG19, you need to give the correct chromosome name, i.e. ``chr20`` in this case. However, note that the Human Origins data set uses just plain numbers as chromosomes, so you want to use the option ``--outChrom 20`` in simpleBamCaller to convert the chromosome name to plain numbers.
+3. ``-r $REF_SEQ``. This is the reference sequence that was used to align your bam file to. You find them under ``/projects1/Reference_Genomes``.
+4. ``-o EigenStrat``: This specifies that the output should be in EigenStrat format, which is the format of the HO data set, with which we need to merge our test data. EigenStrat formatted data sets consist of three files: i) a SNP file, with the positions and alleles of each SNP
+5. ``-e $OUT_PREFIX``. This will be the file prefix for the
+6. ``$BAM1 $BAM2 ...`` This are the bam files of your test samples. Note that you will call simultaneously in all samples to generate a joined EigenStrat files for a single chromosome for all samples.
 
-1. `-f $SNP_FILE`: This option gives the file with the list of SNPs and alleles. The program expects a three-column format consisting of chromosome, position and the two alleles separated by a comma. For the Human Origins SNP panel we have prepared such a file. You can find it at `/projects1/users/schiffels/PublicData/HumanOriginsData.backup/EuropeData.positions.txt`. In case you have aligned your samples to HG19, which uses chromosome names start with "chr", you need to use the file `EuropeData.positions.altChromName.txt` in the same directory.
-2. `-c 20` The chromosome name. In simpleBamCaller you need to call each chromosome separately. It's anyway recommended to parallelise across chromosomes to speed up calling. Note that if your BAM files are aligned to HG19, you need to give the correct chromosome name, i.e. "chr20" in this case. However, note that the Human Origins data set uses just plain numbers as chromosomes, so you want to use the option `--outChrom 20` in simpleBamCaller to convert the chromosome name to plain numbers.
-3. `-r $REF_SEQ`. This is the reference sequence that was used to align your bam file to. You find them under `/projects1/Reference_Genomes`.
-4. `-o EigenStrat`: This specifies that the output should be in EigenStrat format, which is the format of the HO data set, with which we need to merge our test data. EigenStrat formatted data sets consist of three files: i) a SNP file, with the positions and alleles of each SNP
-5. `-e $OUT_PREFIX`. This will be the file prefix for the
-6. `$BAM1 $BAM2 ...` This are the bam files of your test samples. Note that you will call simultaneously in all samples to generate a joined EigenStrat files for a single chromosome for all samples.
+You should try the command line, perhaps piping the result into `head` to only look at the first 10 lines of the genotype-output. You may encounter an error of the sort "inconsistent number of genotypes. Check that bam files have different readgroup sample names". In that case you will first have to fix your bam files (see section below). If you do not encounter this error, you can skip the next section.
 
-You should try the command line, perhaps piping the result into `head` to only look at the first 10 lines of the genotype-output. You may encounter an error of the sort "inconsistent number of genotypes. Check that bam files have different readgroup sample names". In that case you will first have to fix your bam files (see section below). If you do not encounter this error, you can skip the next section. 
+.. note:: Fixing the bam read group
 
-### Interlude: Fixing the bam read group
+  For multi-sample calling, bam files need to contain a certain flag in their header specifying the read group. This flag also contains the name of the sample whose data is contained in the BAM file. Standard mapping pipelines like BWA and EAGER might not add this flag in all cases, so we have to do that manually. Fortunately, it is relatively easy to do this using the Picard software. The `documentation <http://broadinstitute.github.io/picard/command-line-overview.html#AddOrReplaceReadGroups>`_ of the ``AddOrReplaceReadGroups`` tool shows an example command line, which in our case can look like this:
 
-For multi-sample calling, bam files need to contain a certain flag in their header specifying the read group. This flag also contains the name of the sample whose data is contained in the BAM file. Standard mapping pipelines like bwa and EAGER do not add this flag, so we have to do that manually. Fortunately, it is relatively easy to do this using the Picard software. The [documentation](http://broadinstitute.github.io/picard/command-line-overview.html#AddOrReplaceReadGroups) of the "AddOrReplaceReadGroups" tool shows an example command line, which in our case can look like this:
+  .. code-block:: bash
 
     picard AddOrReplaceReadGroups I=$INPUT_BAM O=$OUTPUT_BAM RGLB=$LIB_NAME RGPL=$PLATFORM RGPU=$PLATFORM_UNIT RGSM=$NAME
 
-Here, the only really important parameter is `RGSM=$NAME`, where `$NAME` should be your sample name. The other parameters are required but not terribly important: `$LIB_NAME` can be some library name, or you can simply use the same name as your sample name. `$PLATFORM` should be `illumina` but can be any string, `$PLATFORM_UNIT` can be "unit1" or something like that.
+Here, the only really important parameter is ``RGSM=$NAME``, where ``$NAME`` should be your sample name. The other parameters are required but not terribly important: ``$LIB_NAME`` can be some library name, or you can simply use the same name as your sample name. ``$PLATFORM`` should be ``illumina`` but can be any string, ``$PLATFORM_UNIT`` can be ``unit1`` or something like that.
 
-If you encounter any problems with validation, you can additionally set the parameter `VALIDATION_STRINGENCY=SILENT`.
+If you encounter any problems with validation, you can additionally set the parameter ``VALIDATION_STRINGENCY=SILENT``.
 
 In order to run this tool on all your samples you should submit jobs via a shell script, which in my case looked like this:
 
+.. code-block:: bash
+
     #!/usr/bin/env bash
-    
+
     BAMDIR=/data/schiffels/MyProject/mergedBams.backup
-    
+
     for SAMPLE in $(ls $BAMDIR); do
         BAM=$BAMDIR/$SAMPLE/$SAMPLE.mapped.sorted.rmdup.bam
         OUT=$BAMDIR/$SAMPLE/$SAMPLE.mapped.sorted.rmdup.fixedHeader.bam
         CMD="picard AddOrReplaceReadGroups I=$BAM O=$OUT RGLB=$SAMPLE RGPL=illumina RGPU=HiSeq RGSM=$SAMPLE"
         echo "$CMD"
-        # sbatch -c 2 -o $OUTDIR/$SAMPLE.sexDetermination.log --wrap="$CMD"
+        # sbatch -c 2 -o $OUTDIR/$SAMPLE.readgroups.log --wrap="$CMD"
     done
 
-As in the previous session, write your own script like that, make it executable using `chmod u+x`, run it, chec that the printed commands look correct, and then remove the comment from the `sbatch` line to submit the jobs.
+As in the previous session, write your own script like that, make it executable using ``chmod u+x``, run it, check that the printed commands look correct, and then remove the comment from the `sbatch` line to submit the jobs.
 
-### Continuing with genotyping...
+Continuing with genotyping
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If the calling pipeline described above works with the fixed bam files, the first lines of the output (using `head`) should look like this:
+If the calling pipeline described above works with the fixed bam files, the first lines of the output (using ``head``) should look like this::
 
     [warning] tag DPR functional, but deprecated. Please switch to `AD` in future.
     [mpileup] 5 samples in 5 input files
@@ -73,7 +76,7 @@ If the calling pipeline described above works with the fixed bam files, the firs
     22292
     20090
 
-The first three lines are just output to stderr (they won't appear in the file when you pipe via `> $OUT_FILE`). The 10 last lines are the called genotypes on the input SNPs. Here, a 2 denotes the reference allele, 0 denotes the alternative allele, and 9 denotes missing data. If you also look at the first 10 lines of the `*.snp.txt` file, set via the `-e` option above, you should see something like this:
+The first three lines are just output to stderr (they won't appear in the file when you pipe via ``> $OUT_FILE``). The 10 last lines are the called genotypes on the input SNPs. Here, a 2 denotes the reference allele, 0 denotes the alternative allele, and 9 denotes missing data. If you also look at the first 10 lines of the `*.snp.txt` file, set via the `-e` option above, you should see something like this::
 
     20_97122	20	0	97122	C	T
     20_98930	20	0	98930	G	A
@@ -84,20 +87,22 @@ The first three lines are just output to stderr (they won't appear in the file w
     20_126923	20	0	126923	C	A
     20_127194	20	0	127194	T	C
     20_129063	20	0	129063	G	A
-    20_140280	20	0	140280	T	C    
+    20_140280	20	0	140280	T	C
 
-which is the EigenStrat output for the SNPs. Here, the second column is the chromosome, the fourth column is the position, and the 5th and 6th are the two alleles. Note that simpleBamCaller automatically restricts the calling to the two alleles given in the input file. EigenStrat output also generates an `*.ind.txt` file, again set via the `-e` prefix flag. We will look at it later.
+which is the EigenStrat output for the SNPs. Here, the second column is the chromosome, the fourth column is the position, and the 5th and 6th are the two alleles. Note that simpleBamCaller automatically restricts the calling to the two alleles given in the input file. EigenStrat output also generates an ``*.ind.txt`` file, again set via the ``-e`` prefix flag. We will look at it later.
 
 OK, so now that you know that it works in principle, you need to again write a little shell script that performs this calling for all samples on all chromosomes. In my case, it looks like this:
 
+.. code-block:: bash
+
     #!/usr/bin/env bash
-    
+
     BAMDIR=/data/schiffels/MyProject/mergedBams.backup
     REF=/projects1/Reference_Genomes/Human/hs37d5/hs37d5.fa
     SNP_POS=/projects1/users/schiffels/PublicData/HumanOriginsData.backup/EuropeData.positions.autosomes.txt
     OUTDIR=/data/schiffels/MyProject/genotyping
     mkdir -p $OUTDIR
-    
+
     BAM_FILES=$(ls $BAMDIR/*/*.mapped.sorted.rmdup.bam | tr '\n' ' ')
     for CHR in {1..22}; do
         OUTPREFIX=$OUTDIR/MyProject.HO.eigenstrat.chr$CHR
@@ -107,7 +112,7 @@ OK, so now that you know that it works in principle, you need to again write a l
         # sbatch -c 2 -o $OUTDIR/$SAMPLE.sexDetermination.log --mem=2000 --wrap="$CMD"
     done
 
-Note that I am now looping over 22 chromosomes instead of samples (as we have done in other scripts). The line beginning with `BAM_FILES=...` looks a bit cryptic. The syntax `$(...)` will put the output of the command in brackets into the `BAM_FILES` variable. The `tr '\n' ' '` bit takes the listing output from `ls` and convert new lines into spaces, such that all bam files are simply put behind each other in the `simpleBamCaller` command line. Before you submit, look at the output of this script by piping it into `less -S`, which will not wrap the very long command lines and allows you to inspect whether all files are given correctly. When you are sure it's correct, remove the comment from the `sbatch` line and comment out the `echo` line to submit. 
+Note that I am now looping over 22 chromosomes instead of samples (as we have done in other scripts). The line beginning with ``BAM_FILES=...`` looks a bit cryptic. The syntax ``$(...)`` will put the output of the command in brackets into the ``BAM_FILES`` variable. The ``tr '\n' ' '`` bit takes the listing output from ``ls`` and convert new lines into spaces, such that all bam files are simply put behind each other in the ``simpleBamCaller`` command line. Before you submit, look at the output of this script by piping it into ``less -S``, which will not wrap the very long command lines and allows you to inspect whether all files are given correctly. When you are sure it's correct, remove the comment from the ``sbatch`` line and comment out the ``echo`` line to submit.
 
 ### A word about DNA damage
 If the samples you are analysing are ancient samples, the DNA will likely contain DNA damage, so C->T changes which are seen as C->T and G->A substitutions in the BAM files. There are two ways how to deal with that. First, if your data is not UDG-treated, so if it contains the full damage, you should restrict your analysis to Transversion SNPs only. To that end, simply add the `-t` flag to `simpleBamCaller`, which will automatically output only transversion SNPs. If your data is UDG-treated, you will have much less damage, but you can still see damaged sites in particular in the boundary of the reads in your BAM-file. In that case, you probably want to make a modified bam file for each sample, where the first 2 bases on each end of the read are clipped. A useful tool to do that is [TrimBam](http://genome.sph.umich.edu/wiki/BamUtil:_trimBam), which we will not discuss here, but which I recommend to have a look at if you would like to analyse Transition SNPs from UDG treated libraries.
@@ -168,4 +173,4 @@ where `$PARAM_FILE` should be replaced by your parameter file, of course.
 
 To test whether it worked correctly, you should check the resulting "indoutfilename" as specified in the parameter file, to see whether it contains both the individuals of the reference panel and the those of your test data set.
 
-Note that the output of the `mergeit` program is by default a binary format called "PACEDANCESTRYMAP", which is fine for smartpca but not for other analyses we'll be doing later, so I explicitly put the outputformat in the parameter file to force the output to be eigenstrat. 
+Note that the output of the `mergeit` program is by default a binary format called "PACEDANCESTRYMAP", which is fine for smartpca but not for other analyses we'll be doing later, so I explicitly put the outputformat in the parameter file to force the output to be eigenstrat.
