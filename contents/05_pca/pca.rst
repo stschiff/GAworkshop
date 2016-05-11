@@ -57,12 +57,12 @@ where ``fn`` obviously should point to the ``*.evec.txt`` file produced from ``s
 
 You see that it's pretty much a table. You can now very easily produce a plot of PC1 vs. PC2, by typing ``plot(evecDat$PC1, evecDat$PC2, xlab="PC1", ylab="PC2")``, which in my case yields a boring figure like this:
 
-.. image:: pca_simple.pdf
+.. image:: pca_simple.png
    :width: 300px
    :height: 300px
    :align: center
 
-Now, obviously, we would like to highlight the different populations by color. A quick and dirty solution is to simply plot different subsets of the data on top of each other, like this:
+Now, obviously, we would like to highlight the different populations by color. A quick and dirty solution is to simply plot different subsets of the data on top of each other, like this::
 
     plot(evecDat$PC1, evecDat$PC2, xlab="PC1", ylab="PC2")
     d = evecDat[evecDat$Pop=="Yoruba",]
@@ -74,11 +74,14 @@ Now, obviously, we would like to highlight the different populations by color. A
 
 You can copy and paste all those lines simultaneously into the console, by the way. This sequence of commands gives us:
 
-![PCAwithSomeColor](pcaWithSomeColor.pdf)
+.. image:: pcaWithSomeColor.png
+   :width: 300px
+   :height: 300px
+   :align: center
 
-OK, but how do we systematically show all the interesting populations? In principle, R makes this easily possible: Instead of choosing a single color and symbols (the `col` and `pch` options), you can give R vectors to these options, which contain one value for each sample. To make this clearer, run `plot(evecDat$PC1, evecDat$PC2, col=evecDat$Pop)`, which should produce a _very_ colorful, but also useless, plot, where each population has its own color (although R cycles only 8 colors, so you will have every color used for many populations). OK, this is not useful. We should have a broader categorization into continental groups.
+OK, but how do we systematically show all the interesting populations? In principle, R makes this easily possible: Instead of choosing a single color and symbols (the ``col`` and ``pch`` options), you can give R vectors to these options, which contain one value for each sample. To make this clearer, run ``plot(evecDat$PC1, evecDat$PC2, col=evecDat$Pop)``, which should produce a _very_ colorful, but also useless, plot, where each population has its own color (although R cycles only 8 colors, so you will have every color used for many populations). OK, this is not useful. We should have a broader categorization into continental groups.
 
-The way I have come up with first involves making a new tabular file with two columns, to denote the continental groups that the populations are in, like this:
+The way I have come up with first involves making a new tabular file with two columns, to denote the continental groups that the populations are in, like this::
 
     BantuKenya	African
     BantuSA	African
@@ -100,15 +103,15 @@ The way I have come up with first involves making a new tabular file with two co
     Tunisian_Jew	NorthAfrican
     ...
 
-The names in the first column should be taken from the population names in your merged *.ind.txt file that you input to smartpca. An example file can be found in the Google Drive folder under `HO_popGroups.txt`. You can load this file into a data frame in R via
+The names in the first column should be taken from the population names in your merged ``*.ind.txt`` file that you input to ``smartpca``. An example file can be found in the Google Drive folder under ``HO_popGroups.txt``. You can load this file into a data frame in R via::
 
     popGroups=read.table("~/Google_Drive/Projects/GAworkshopScripts/HO_popGroups.txt", col.names=c("Pop", "PopGroup"))
 
-You can again convince yourself that it worked by typing `head(popGroups)`. We can now make use of a very convenient feature in R which lets us easily merge two data frames together. What we need is a new data frame which consists of the `evecDat` data frame, but with an additional column indicating the continental group. This involves a lookup in `popGroups` for every population in `evecDat`. This command does the job:
+You can again convince yourself that it worked by typing ``head(popGroups)``. We can now make use of a very convenient feature in R which lets us easily merge two data frames together. What we need is a new data frame which consists of the ``evecDat`` data frame, but with an additional column indicating the continental group. This involves a lookup in ``popGroups`` for every population in ``evecDat``. This command does the job::
 
     mergedEvecDat = merge(evecDat, popGroups, by="Pop")
 
-You can see via `head(mergedEvecDat)`:
+You can see via ``head(mergedEvecDat)``::
 
             Pop Sample     PC1     PC2     PC3     PC4    PC5     PC6    PC7     PC8     PC9    PC10 PopGroup
     1 Abkhasian abh107 -0.0080 -0.0211 -0.0040 -0.0003 0.0073 -0.0025 0.0096 -0.0204 -0.0052 -0.0126    Asian
@@ -118,23 +121,26 @@ You can see via `head(mergedEvecDat)`:
     5 Abkhasian  abh27 -0.0077 -0.0218 -0.0039 -0.0011 0.0039 -0.0024 0.0076 -0.0205 -0.0055 -0.0121    Asian
     6 Abkhasian  abh41 -0.0077 -0.0209 -0.0046 -0.0015 0.0054 -0.0028 0.0047 -0.0208 -0.0078 -0.0130    Asian
 
-that there now is a new column to the right called `PopGroup`, which correctly contains the group for each sample. Note that this new dataframe only contains rows with populations that are actually in your original `popGroups` data set, so in the file you created. You can see this by running `nrow`:
+that there now is a new column to the right called ``PopGroup``, which correctly contains the group for each sample. Note that this new dataframe only contains rows with populations that are actually in your original ``popGroups`` data set, so in the file you created. You can see this by running ``nrow``::
 
     > nrow(mergedEvecDat)
     [1] 1306
     > nrow(evecDat)
     [1] 2257
 
-You see that in my case the `mergedEvecDat` only contains 1306 samples, whereas the full data set had 2257 samples. So you can use this to select specific populations you would like to have plotted.
+You see that in my case the ``mergedEvecDat`` only contains 1306 samples, whereas the full data set had 2257 samples. So you can use this to select specific populations you would like to have plotted.
 
-OK, so now, as a first step, we can improve our simple first plot by using the color to indicate the continental group:
+OK, so now, as a first step, we can improve our simple first plot by using the color to indicate the continental group::
 
     plot(mergedEvecDat$PC1, mergedEvecDat$PC2, col=mergedEvecDat$PopGroup)
     legend("bottomright", legend=levels(mergedEvecDat$PopGroup), col=1:length(levels(mergedEvecDat$PopGroup)), pch=20)
 
-![PCAwithPopGroupColor](pcaWithPopGroupColor.pdf)
+.. image:: pcaWithPopGroupColor.png
+    :width: 300px
+    :height: 300px
+    :align: center
 
-The final solution for me was to also separate populations by symbol, which involves a bit more hacking. First, to use different symbols for different populations, you can give a simple vector of symbols to the `plot` command via `pch=as.integer(mergedEvecDat$Pop) %% 24`. The trick here is that first you convert `mergedEvecDat$Pop` to an integer enumerating all populations, and then you use the `modulo` operation to cycle through 24 different numbers. The complete solution in my case looks like this:
+The final solution for me was to also separate populations by symbol, which involves a bit more hacking. First, to use different symbols for different populations, you can give a simple vector of symbols to the ``plot`` command via ``pch=as.integer(mergedEvecDat$Pop) %% 24``. The trick here is that first you convert ``mergedEvecDat$Pop`` to an integer enumerating all populations, and then you use the ``modulo`` operation to cycle through 24 different numbers. The complete solution in my case looks like this::
 
     fn = "~/Data/GAworkshop/pca/MyProject.HO.merged.pca.evec.txt"
     evecDat = read.table(fn, col.names=c("Sample", "PC1", "PC2", "PC3", "PC4", "PC5",
@@ -151,6 +157,10 @@ The final solution for me was to also separate populations by symbol, which invo
 
 which produces:
 
-![FullPCA](fullPCA.pdf)
+.. image:: fullPCA.png
+    :width: 300px
+    :height: 300px
+    :align: center
 
-Of course, here I haven't yet included my test individuals, but you can see easily how to include them in the `HO_popGroups.txt` file. Also, in `plot` you can use the `xlim` and `ylim` options to zoom into specific areas of the plot, e.g. try `xlim=c(-0.01,0.01), ylim=c(-0.03,-0.01)` in the `plot` command above.
+
+Of course, here I haven't yet included my test individuals, but you can see easily how to include them in the ``HO_popGroups.txt`` file. Also, in ``plot`` you can use the ``xlim`` and ``ylim`` options to zoom into specific areas of the plot, e.g. try ``xlim=c(-0.01,0.01), ylim=c(-0.03,-0.01)`` in the ``plot`` command above.
