@@ -9,9 +9,7 @@ Basic software
 
 There are some softwares that you will want to install for this session.
 
- Max OSX
+ Mac OSX
  -------
 
-.. Direct access to cluster storage::
-
- 
+Stuff
