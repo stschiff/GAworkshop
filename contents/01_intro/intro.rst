@@ -43,10 +43,10 @@ The command line environment
 
 The command line environment allows you to interact with the compute system using text. The standard mode of interaction is as follows:
 
-- **R**ead
-- **E**valuate
-- **P**rint
-- **L**oop
+- **R**\ ead
+- **E**\ valuate
+- **P**\ rint
+- **L**\ oop
 
 The commands that you type are read and evaluated by a program called the **shell**. The window that displays the shell program is usually called the **terminal**.
 
