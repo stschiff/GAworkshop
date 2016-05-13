@@ -34,7 +34,44 @@ The output of this command should look like this: ::
     1	903427	0
     1	912660	1
 
-(Use ``Ctrl-C`` to stop the command if it stalls.) The columns denote chromosome, position and the number of reads covering that site. We now need to write a little script that counts those read numbers for us, distinguishing autosomes, X chromosome and Y chromosome. I prepared such a script in ``/projects1/tools/workshop/2016/GenomeAnalysisWorkshop/sexDetermination.awk``. Copy that script into your project directory and open it with an editor. It is a script for the ``awk`` program, which is a very useful UNIX utility that is perfect for doing simple counting- or other statistics on file streams. You can learn awk yourself if you want, but for now the only important thing are the code lines which read
+(Use ``Ctrl-C`` to stop the command if it stalls.) The columns denote chromosome, position and the number of reads covering that site. We now need to write a little script that counts those read numbers for us, distinguishing autosomes, X chromosome and Y chromosome. Here is my version of this in ``awk``:
+
+.. code-block:: awk
+
+    BEGIN {
+        xReads = 0
+        yReads = 0
+        autReads = 0
+
+        xSites = 0
+        ySites = 0
+        autSites = 0
+    }
+    {
+        chr = $1
+        pos = $2
+        cov = $3
+        if(chr == "chrX") {
+            xReads += cov
+            xSites += 1
+        }
+        else if(chr == "chrY") {
+            yReads += cov
+            ySites += 1
+        }
+        else {
+            autReads += cov
+            autSites += 1
+        }
+    }
+    END {
+        OFS="\t"
+        print("xCoverage", xSites > 0 ? xReads / xSites : 0)
+        print("yCoverage", ySites > 0 ? yReads / ySites : 0)
+        print("autCoverage", autSites > 0 ? autReads / autSites : 0)
+    }
+
+``awk`` is a very useful UNIX utility that is perfect for doing simple counting- or other statistics on file streams. You can learn awk yourself if you want, but for now the only important thing are the code lines which read
 
 .. code-block:: awk
 
@@ -68,7 +105,7 @@ Makes sense, right? OK, so now that you have your little awk script with the cor
 
     samtools depth -q30 -Q37 -a -b $SNP_POS $BAM_FILE | head -1000 | awk -f sexDetermination.awk
 
-Here, I am only piping the first 1000 lines into the awk script to see whether it works. The output should look like: ::
+where I assume that the ``awk``-code above is copied into a file called ``sexDetermination.awk`` in the current directory. Here, I am only piping the first 1000 lines into the awk script to see whether it works. The output should look like: ::
 
     xCoverage	0
     yCoverage	0
