@@ -270,7 +270,7 @@ A good way to determine whether we have a lot of undefined positions relative to
    tr -d -c 'N' < Results/Sample_A/Sample_A_q30.fasta | awk '{ print length; }'
    16,569
 
-As you see, for our `Sample_A`, the output doesn't change, meaning we already have pretty high numbers of Ns in our output, meaning they have been filtered out. As you might recall, this is totally fine, since `schmutzi` declared this sample to be heavily contaminated anyways. Therefore we repeat this for `Sample_B` now to see if this behaves better:
+As you see, for our `Sample_A`, the output doesn't change, meaning we already have pretty high numbers of 'N' in our output, meaning they have been filtered out with such light filtering (q20,q30) already. That does basically tell us, that the SampleA is of bad provenance, having likely contamination and potentially poorly covered bases, too. As you might recall, this is totally fine, since `schmutzi` declared this sample to be heavily contaminated anyways. Therefore we repeat this for `Sample_B` now to see if this behaves better:
 
 .. code-block:: bash
 
