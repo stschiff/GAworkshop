@@ -3,7 +3,7 @@ Sex Determination and X chromosome contamination estimate
 
 One way to determine the nuclear contamination estimate works only in male samples. It is based on the fact that males have only one copy of the X chromosome, so any detectable heterozygosity on the X chromosome in males would suggest certain amount of contamination. Note that the sex of the contaminating sample is not important here, as both male and female contamination would contribute at least one more x chromosome, which would show up in this contamination test.
 
-We will proceed in two steps. First, we need to determine the molecular sex of each sample. Second, we will run ANGSD for contamintation estimation on all male samples.
+We will proceed in two steps. First, we need to determine the molecular sex of each sample. Second, we will run ANGSD for contamination estimation on all male samples.
 
 Sex determination
 -----------------
